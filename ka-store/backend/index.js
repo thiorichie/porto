@@ -2,12 +2,18 @@ const mongoose = require('mongoose')
 const express = require("express")
 const api = require("./routes/index")
 const cors = require("cors")
+const cookieParser = require('cookie-parser')
 
 // Inisialisasi aplikasi Express
 const app = express();
+app.use(cookieParser())
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: 'GET, POST',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const port = 3000

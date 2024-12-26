@@ -34,21 +34,30 @@ export default function LoginForm() {
 
   const handleRegister = (data) => {
     try {
-        axios.post('http://localhost:3000/api/user/createUser', {
-            name: data.name, phoneNumber: data.phoneNumber, password: data.password
-        })
-        .then(response => console.log(response.data))
-        .catch(error => console.error('Error:', error));
-        alert("User berhasil dibuat!")
-        dispatch(setUserLogin(data.name))
-        navigate('/')
+      axios.post('http://localhost:3000/api/user/createUser', {
+          name: data.name, 
+          phoneNumber: data.phoneNumber, 
+          password: data.password
+      }, { withCredentials: true })
+      .then(response => {
+          console.log(response.data);
+          alert("User berhasil dibuat!");
+          // dispatch(setUserLogin(data.name));
+          navigate('/');
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          if (error.response && error.response.data && error.response.data.message) {
+              alert(`Error: ${error.response.data.message}`);
+          } else {
+              alert('Terjadi kesalahan saat mendaftarkan user.');
+          }
+      });
+    } catch (e) {
+      alert(`Unexpected error: ${e}`);
     }
-    catch (e){
-        alert(e);
-    }
-    // Redirect to dashboard or home page after successful login
-    // navigate('/dashboard');
   };
+  
 
   return (
     <div style={{
@@ -152,11 +161,13 @@ export default function LoginForm() {
             style={{
               fontWeight: '500',
               color: '#2563eb',
-              backgroundColor: 'transparent',
+              backgroundColor: '#007bff',
+              color: 'aliceblue',
               border: '1px solid #2563eb',
               padding: '4px 8px',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '14px',
+              borderRadius: '10px'
             }}
           >
             Login here

@@ -1,23 +1,25 @@
 import React, {useEffect} from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import Backg from '../assets/KA_BG.jpg'
-import Logo from '../assets/LOGO.png'
+import Backg from '../assets/KA_BG.jpg';
+import Logo from '../assets/LOGO.png';
+import GoogleIcon from '../assets/google_signUp.png'; // Pastikan path gambar sesuai dengan letak file Google icon.
+import axios from 'axios'
 
 export default function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
 
   useEffect(() => {
-    
-    // Set background image for the body
+
+
+
     document.body.style.backgroundImage = `url(${Backg})`;
     document.body.style.backgroundSize = "cover";
     document.body.style.backgroundPosition = "center";
     document.body.style.backgroundRepeat = "no-repeat";
     document.body.style.backgroundAttachment = "fixed";
 
-    // Cleanup function to remove the background image when component unmounts
     return () => {
       document.body.style.backgroundImage = "";
       document.body.style.backgroundSize = "";
@@ -27,11 +29,36 @@ export default function LoginForm() {
     };
   }, []);
 
-  const handleLogin = (data) => {
-    // Handle login logic here
-    console.log(data);
-    // Redirect to dashboard or home page after successful login
-    // navigate('/dashboard');
+  const handleLogin = async (data) => {
+    axios.post('http://localhost:3000/api/user/login', {
+      phoneNumber: data.phoneNumber,
+      password: data.password
+    }, {withCredentials: true})
+    .then(response => {
+      console.log(response.data);
+      alert(response.data.message);
+      navigate('/');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+          alert(`Error: ${error.response.data.message}`);
+      } else {
+          alert('Terjadi kesalahan saat login user.');
+      }
+    });
+  };
+  
+
+  const handleGoogleLogin = async () => {
+    try {
+      const cobaLogGoogle = await fetch('http://localhost:3000/api/auth/google/request', {method: 'post'});
+      const data = await cobaLogGoogle.json();
+      console.log(data)
+      window.location.href = data.url;
+    } catch (e){
+      alert(e)
+    }
   };
 
   return (
@@ -111,6 +138,33 @@ export default function LoginForm() {
             Login
           </button>
         </form>
+
+        {/* Teks OR dengan garis sambung */}
+        <div style={{display: 'flex', alignItems: 'center', margin: '16px 0', textAlign: 'center'}}>
+          <div style={{flex: 1, borderBottom: '1px solid #d1d5db'}}></div>
+          <span style={{margin: '0 8px', color: '#6b7280', fontSize: '14px'}}>OR</span>
+          <div style={{flex: 1, borderBottom: '1px solid #d1d5db'}}></div>
+        </div>
+
+        {/* Sign in with Google Button */}
+        <button
+          onClick={handleGoogleLogin}
+          style={{
+            width: '100%',
+            height: '37px',
+            backgroundColor: '#4285F4',
+            border: 'none',
+            borderRadius: '50px',
+            fontSize: '14px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img src={GoogleIcon} alt="Google Logo" width="55%" style={{marginRight: '8px', borderRadius: '5px'}} />
+        </button>
+
         <p style={{marginTop: '16px', textAlign: 'center', fontSize: '14px', color: '#4b5563'}}>
           Don't have an account?{' '}
           <button
@@ -118,19 +172,21 @@ export default function LoginForm() {
             style={{
               fontWeight: '500',
               color: '#2563eb',
-              backgroundColor: 'transparent',
+              backgroundColor: '#007bff',
+              color: 'aliceblue',
               border: '1px solid #2563eb',
               padding: '4px 8px',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '14px',
+              borderRadius: '10px'
             }}
           >
             Register here
           </button>
         </p>
-        <img src={Logo} alt="Bootstrap" width="200px" height="50px" style={{marginTop: '0px', backgroundColor: 'black'}}/>
+
+        <img src={Logo} alt="Logo" width="200px" height="50px" style={{marginTop: '16px', backgroundColor: 'black'}}/>
       </div>
     </div>
   );
 }
-

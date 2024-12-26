@@ -1,23 +1,57 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap';
 import logo from '../assets/LOGO.png';
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { setUserLogin } from '../redux/userLoginSlice';
+import { useDispatch } from 'react-redux';
+import axios from 'axios'
 
 function Navbar() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const userLogin = useSelector((state) => state.userLogin.username);
+  const { register, handleSubmit } = useForm();
+  const userLogin = useSelector((state) => state.userLogin);
+  const dispatch = useDispatch();
 
   const handleSearch = async (data) => {
     console.log(data.search);
   };
 
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:3000/api/user/logout', {}, { withCredentials: true });
+      dispatch(setUserLogin({ frontName: null, picture: null }));
+      navigate('/login');
+    } catch (error) {
+      console.error('Error during logout:', error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    const getUserLogin = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/user/getUser', {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        dispatch(setUserLogin({
+          frontName: response.data.getData.given_name,
+          picture: response.data.getData.picture
+        }));
+      } catch (error) {
+        console.error('Error fetching user data:', error.response?.data || error.message);
+      }
+    };
+
+    getUserLogin();
+  }, []);
+
   return (
     <div>
-      {/* Navbar dengan CSS sticky */}
       <nav
         className="navbar navbar-expand-lg bg-primary text-white"
         style={{
@@ -31,12 +65,10 @@ function Navbar() {
         }}
       >
         <div className="container-fluid">
-          {/* Navbar Brand */}
           <a className="navbar-brand text-white" onClick={() => navigate('/')}>
             <img src={logo} alt="Logo" width="200px" height="50px" />
           </a>
 
-          {/* Toggle Button */}
           <button
             className="navbar-toggler"
             type="button"
@@ -50,7 +82,6 @@ function Navbar() {
           </button>
 
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            {/* Centered Search Bar */}
             <form className="d-flex mx-auto" style={{ maxWidth: "50%" }} role="search" onSubmit={handleSubmit(handleSearch)}>
               <input
                 className="form-control me-2"
@@ -60,45 +91,63 @@ function Navbar() {
                 style={{ width: "700px", height: "50px" }}
                 {...register('search')}
               />
-              <button className="btn btn-outline-light" type="submit">Search</button>
+              <button className="btn btn-outline-light" type="submit" style={{ backgroundColor: 'aliceblue', color: '#007bff' }}>Search</button>
             </form>
 
-            {/* Conditional Rendering Based on userLogin */}
-            {userLogin === "" ? (
-              <button className="btn btn-outline-light" onClick={() => navigate('/login')}>
+            {!userLogin.frontName ? (
+              <button className="btn btn-outline-light" onClick={() => navigate('/login')} style={{ backgroundColor: 'aliceblue', color: '#007bff' }}>
                 Login
               </button>
             ) : (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                color: '#fff',
-              }} onClick={() => navigate('/profile')}>
-                
-                {/* Menampilkan username di sebelah kiri */}
-                <div style={{
-                  marginRight: '8px',
-                  fontSize: '20px',
-                  color: '#fff'
-                }}>
-                  {userLogin}
+              <div className="dropdown">
+                <div
+                  className="d-flex align-items-center dropdown-toggle"
+                  id="dropdownMenuButton1"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  style={{
+                    cursor: 'pointer',
+                    backgroundColor: 'aliceblue',
+                    borderRadius: '10px',
+                    padding: '5px 15px'
+                  }}
+                >
+                  <div style={{ marginRight: '8px', fontSize: '20px', color: '#007bff' }}>
+                    {userLogin.frontName}
+                  </div>
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fff',
+                      border: '1px solid #007bff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center', // memastikan teks berada di tengah
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      color: '#007bff', // warna teks inisial
+                    }}
+                  >
+                    {userLogin.picture ? (
+                      <img 
+                        src={userLogin.picture} 
+                        alt="Profile" 
+                        width="40px" 
+                        height="40px"
+                        style={{ borderRadius: '50%' }}
+                      />
+                    ) : (
+                      userLogin.frontName?.charAt(0)?.toUpperCase() || 'U' // inisial huruf depan
+                    )}
+                  </div>
                 </div>
 
-                {/* Lingkaran dengan huruf awal */}
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'black',
-                  fontSize: '14px',
-                }}>
-                  {userLogin?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
+                <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a className="dropdown-item" onClick={() => navigate('/profile')}>Profile</a></li>
+                  <li><a className="dropdown-item" onClick={handleLogout}>Logout</a></li>
+                </ul>
               </div>
             )}
           </div>

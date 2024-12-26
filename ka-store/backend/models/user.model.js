@@ -1,14 +1,21 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: {
+  fullName: {
     type: String,
     required: true,
     trim: true,
   },
+  frontName: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    trim: true
+  },
   phoneNumber: {
     type: String,
-    required: true,
     trim: true,
     validate: {
       validator: function(v) {
@@ -19,8 +26,14 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
   },
+  picture: {
+    type: String,
+  },
+  saldo: {
+    type: Number,
+    default: 0
+  }
 }, { timestamps: true }); // Menambahkan createdAt dan updatedAt secara otomatis
 
 // Model User

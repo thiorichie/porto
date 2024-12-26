@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react'
 import Navbar from '../components/Navbar'
 import Carousel from '../components/Carousel'
+import ListGame from '../components/ListGame';
 
 function LandingPages() {
   useEffect(() => {
@@ -25,6 +26,7 @@ function LandingPages() {
     <div>
       <Navbar/>
       <Carousel/>
+      <ListGame/>
     </div>
   )
 }
