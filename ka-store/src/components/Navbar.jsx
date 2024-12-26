@@ -1,46 +1,111 @@
-import React from 'react'
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap';
+import logo from '../assets/LOGO.png';
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function Navbar() {
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const userLogin = useSelector((state) => state.userLogin.username);
+
+  const handleSearch = async (data) => {
+    console.log(data.search);
+  };
+
   return (
     <div>
-      <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Navbar</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Dropdown
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                </ul>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                </li>
-            </ul>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
+      {/* Navbar dengan CSS sticky */}
+      <nav
+        className="navbar navbar-expand-lg bg-primary text-white"
+        style={{
+          paddingLeft: '50px',
+          paddingRight: '50px',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+        }}
+      >
+        <div className="container-fluid">
+          {/* Navbar Brand */}
+          <a className="navbar-brand text-white" onClick={() => navigate('/')}>
+            <img src={logo} alt="Logo" width="200px" height="50px" />
+          </a>
+
+          {/* Toggle Button */}
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            {/* Centered Search Bar */}
+            <form className="d-flex mx-auto" style={{ maxWidth: "50%" }} role="search" onSubmit={handleSubmit(handleSearch)}>
+              <input
+                className="form-control me-2"
+                type="search"
+                placeholder="Cari game-mu disini.."
+                aria-label="Search"
+                style={{ width: "700px", height: "50px" }}
+                {...register('search')}
+              />
+              <button className="btn btn-outline-light" type="submit">Search</button>
             </form>
-            </div>
+
+            {/* Conditional Rendering Based on userLogin */}
+            {userLogin === "" ? (
+              <button className="btn btn-outline-light" onClick={() => navigate('/login')}>
+                Login
+              </button>
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                color: '#fff',
+              }} onClick={() => navigate('/profile')}>
+                
+                {/* Menampilkan username di sebelah kiri */}
+                <div style={{
+                  marginRight: '8px',
+                  fontSize: '20px',
+                  color: '#fff'
+                }}>
+                  {userLogin}
+                </div>
+
+                {/* Lingkaran dengan huruf awal */}
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  backgroundColor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'black',
+                  fontSize: '14px',
+                }}>
+                  {userLogin?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
     </div>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
